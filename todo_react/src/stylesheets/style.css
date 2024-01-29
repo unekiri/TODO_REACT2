@@ -1,0 +1,162 @@
+@charset "UTF-8";
+
+body {
+  color: #432;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+button {
+  border-radius: 16px;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  height: 30px;
+  margin-left: 4px;
+}
+
+button:hover {
+  background-color: #ff7fff;
+  color: #fff;
+}
+
+/* header */
+
+.top {
+  width: 100px;
+  margin-top: 14px;
+  border: 2px solid#333;
+  border-radius: 5px;
+}
+
+.main-nav {
+  display: flex;
+  font-size: 1.25rem;
+  margin-top: 35px;
+  list-style: none;
+} 
+
+.main-nav li {
+  margin-left: 36px;
+  border: 2px solid#333;
+  padding: 4px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.main-nav li:hover {
+  background-color: #f69679;
+  color: #fff;
+}
+
+.main-nav a,a:hover,a:visited{
+  color: inherit;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 4%;
+  border-bottom: 2px solid#333;
+}
+
+/* main */
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  margin: 8px 0;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+}
+
+.form {
+  margin: 8px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.headline {
+  display: flex;
+  justify-content: space-around;
+}
+
+.contents {
+  font-weight: bold;
+}
+
+.plan {
+  color: #ff7fff;
+}
+
+
+.list-row {
+  display: flex;
+  align-items: center;
+  padding-bottom: 4px;
+  justify-content: space-around;
+}
+
+.list-row button {
+  margin-left: 4px;
+}
+
+/* complete */ /* incomplete */
+
+#incomplete-list, #complete-list {
+  margin: 5px 0;
+}
+
+.detail-plan {
+  color:  #ff7fff;
+  padding-top: 3px;
+}
+
+.item-area {
+  display: flex;
+}
+
+.add_text {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.add_text a {
+  border: 2px solid#333;
+  padding: 4px;
+  border-radius: 5px;
+}
+
+.add_text a:hover {
+  background-color: #f69679;
+  color: #fff;
+}
+
+.end_button {
+  margin: 15px 0;
+}
+
+/* _text */
+
+.another-page {
+  margin: 8px 0;
+}
+
+/* error-message */
+.error-message {
+  color: red;
+  padding-left: 8px;
+}
