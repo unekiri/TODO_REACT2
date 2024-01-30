@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Header } from './Header';
-import { MainView } from './MainView';
-import { editItem } from './EditItems';
-import { deleteItem } from './DeleteItem';
-import { changeItem } from './ChangeItem';
 import axios from 'axios';
+import { Header } from './Header';
 import { uri } from './ApiUrl';
+import { CustomModal } from './CustomModal';
 import '../stylesheets/style.css';
 
-const TodoList = ({ title, showButtons, todos }) => {
+const TodoList = ({ title, showButtons, todos, onEdit }) => {
   return (
-    <MainView
-      bkcolor={title === "未完了一覧" ? "#c1ffe2" : "#ffffe0"}
-      title={title}
-      content="内容"
-      plan={title === "未完了一覧" ? "予定日" : "完了日"}
+    <div
+      className={`area ${title === "未完了一覧" ? "unfinished" : "completed"}`}
     >
+      <p className="title">{title}</p>
       <ul id={title === "未完了一覧" ? "incomplete-list" : "complete-list"}>
         {todos.map(item => (
           <div key={item.id} className="list-row">
@@ -24,74 +19,77 @@ const TodoList = ({ title, showButtons, todos }) => {
               <span className="detail-plan">{item.date}</span>
               {showButtons && (
                 <>
-                  <button onClick={() => editItem(item.id, todos)}>編集</button>
-                  <button onClick={() => deleteItem(item.id, item.isComplete)}>削除</button>
-                  <button onClick={() => changeItem(item.id, todos)}> 
-                    {item.isComplete ? '未完了へ変更' : '完了へ変更'}
-                  </button>
+                  <button onClick={() => onEdit(item)}>編集</button>
+                  {/* deleteItem と changeItem の実装は省略 */}
                 </>
               )}
             </div>
           </div>
         ))}
       </ul>
-    </MainView>
+    </div>
   );
 };
 
 export const Home = () => {
   const [todos, setTodos] = useState([]);
-  const [showButtons, setShowButtons] = useState(false); // 初期値をfalseに設定
+  const [showButtons, setShowButtons] = useState(false);
   const [currentView, setCurrentView] = useState("all");
+  const [editingItem, setEditingItem] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    getItems(); // 初期値はfalseのまま
-  }, []);
-
-  const getItems = () => {
     axios.get(uri)
       .then(response => {
-        _displayItems(response.data, showButtons);
-        setTodos(response.data); // データをStateに設定
+        const formattedTodos = response.data.map(item => {
+          if (item.name.length >= 50) {
+            item.name = item.name.match(/.{1,50}/g).join('\n');
+          }
+          item.date = new Date(item.date).toLocaleString("ja-JP", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+          });
+          return item;
+        });
+        // ... 加工後のデータをStateに設定 ...
+        setTodos(formattedTodos);
       })
       .catch(error => console.error('Unable to get items.', error));
-  }
+  }, []);
 
-  const _displayItems = (data, showButtons) => {
-    // ここでDOM操作を行う必要はないので、データの整形のみ行う
-    const formattedTodos = data.map(item => {
-      if (item.name.length >= 50) {
-        item.name = item.name.match(/.{1,50}/g).join('\n');
-      }
-      item.date = new Date(item.date).toLocaleString("ja-JP", {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-      });
-      return item;
-    });
+  const handleEditClick = (item) => {
+    setEditingItem(item);
+    setShowEditModal(true);
+  };
 
-    setTodos(formattedTodos); // データをStateに設定
-  }
   return (
     <>
-      <Header setShowButtons={setShowButtons} setCurrentView={setCurrentView} />
+      <Header 
+        setCurrentView={setCurrentView}
+        setShowButtons={setShowButtons}
+        setTodos={setTodos} // Header に setTodos を渡す
+      />
       <main>
         <div className="container">
           {currentView === "incomplete" && (
-            <TodoList title="未完了一覧" showButtons={showButtons} todos={todos.filter(todo => !todo.isComplete)} />
+            <TodoList title="未完了一覧" showButtons={showButtons} todos={todos.filter(todo => !todo.isComplete)} onEdit={handleEditClick} />
           )}
           {currentView === "complete" && (
-            <TodoList title="完了一覧" showButtons={showButtons} todos={todos.filter(todo => todo.isComplete)} />
+            <TodoList title="完了一覧" showButtons={showButtons} todos={todos.filter(todo => todo.isComplete)} onEdit={handleEditClick} />
           )}
           {currentView === "all" && (
             <>
-              <TodoList title="未完了一覧" showButtons={showButtons} todos={todos.filter(todo => !todo.isComplete)} />
-              <TodoList title="完了一覧" showButtons={showButtons} todos={todos.filter(todo => todo.isComplete)} />
+              <TodoList title="未完了一覧" showButtons={showButtons} todos={todos.filter(todo => !todo.isComplete)} onEdit={handleEditClick} />
+              <TodoList title="完了一覧" showButtons={showButtons} todos={todos.filter(todo => todo.isComplete)} onEdit={handleEditClick} />
             </>
           )}
         </div>
       </main>
+      {/* モーダルの表示 */}
+      {showEditModal && (
+        <CustomModal item={editingItem} onClose={() => setShowEditModal(false)} />
+      )}
     </>
   );
 };

@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Header } from './Header';
 import { Load } from './Load';
-import { FormContents } from './FormContents';
-import { FormDate } from './FormDate';
-import { FormButton } from './FormButton';
+import { FormContents } from './atom/FormContents';
+import { FormDate } from './atom/FormDate';
+import { FormButton } from './atom/FormButton';
 import '../stylesheets/style.css';
 import { edit_updateItem } from './Edit_UpdateItem';
 

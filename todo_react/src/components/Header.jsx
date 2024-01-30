@@ -1,60 +1,62 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { addItem } from './PostItem';
-import { FormContents } from './FormContents';
-import { FormDate } from './FormDate';
-import { FormButton } from './FormButton';
-import top from '../images/top.jpeg';
+import { FormContents } from './atom/FormContents';
+import { FormDate } from './atom/FormDate';
+import { FormButton } from './atom/FormButton';
+import { CustomModal } from './CustomModal';
 import '../stylesheets/style.css';
+import top from '../images/top.jpeg';
+import axios from 'axios';
+import { uri } from './ApiUrl';
 
-const style = {
-  // モーダルのスタイル設定
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
-export const Header = ({ setShowButtons, setCurrentView }) => {
-  const [showForm, setShowForm] = useState(false);
+export const Header = ({ setCurrentView, setShowButtons, setTodos }) => {
+  const [showForm, setShowForm] = useState(false); // モーダルの表示状態
   const { handleSubmit, ...formMethods } = useForm();
 
+  
   const handleHomeClick = () => {
     setCurrentView("all");
     setShowButtons(false);
   };
-
+  
   const handleIncompleteClick = () => {
     setShowButtons(true);
     setCurrentView("incomplete");
-    setShowForm(false);
+    fetchTodos("incomplete"); // 未完了のデータを取得
   };
-
+  
   const handleCompleteClick = () => {
     setShowButtons(true);
     setCurrentView("complete");
-    setShowForm(false);
+    fetchTodos("complete"); // 完了のデータを取得
   };
-
-  const handleOpen = () => {
-    setShowForm(true);
-  };
-
-  const handleClose = () => {
-    setShowForm(false);
-  };
-
+  
   const handleOnSubmit = (data) => {
     addItem(data);
-    handleClose();
+    setShowForm(false); // モーダルを閉じる
+  };
+
+  const fetchTodos = async (status) => {
+    try {
+      const response = await axios.get(`${uri}?status=${status}`);
+      const formattedTodos = response.data.map(item => {
+        if (item.name.length >= 50) {
+          item.name = item.name.match(/.{1,50}/g).join('\n');
+        }
+        item.date = new Date(item.date).toLocaleString("ja-JP", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        });
+        return item;
+      });
+      // ... 加工後のデータをStateに設定 ...
+      setTodos(formattedTodos);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
   };
 
   return (
@@ -66,25 +68,18 @@ export const Header = ({ setShowButtons, setCurrentView }) => {
       </h1>
       <nav>
         <ul className="main-nav">
-          <li><Button onClick={handleIncompleteClick} style={{ cursor: 'pointer' }}>未完了</Button></li>
-          <li><Button onClick={handleCompleteClick} style={{ cursor: 'pointer' }}>完了</Button></li>
-          <li><Button onClick={handleOpen}>Todo追加</Button></li>
+          <li><Button onClick={handleIncompleteClick}>未完了</Button></li>
+          <li><Button onClick={handleCompleteClick}>完了</Button></li>
+          <li><Button onClick={() => setShowForm(true)}>Todo追加</Button></li>
         </ul>
       </nav>
-      <Modal
-        open={showForm}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <form onSubmit={handleSubmit(handleOnSubmit)}>
-            <FormContents formMethods={formMethods}/>
-            <FormDate title="完了予定日" formMethods={formMethods}/>
-            <FormButton/>
-          </form>
-        </Box>
-      </Modal>
+      <CustomModal open={showForm} onClose={() => setShowForm(false)}>
+        <form onSubmit={handleSubmit(handleOnSubmit)}>
+          <FormContents formMethods={formMethods} />
+          <FormDate title="完了予定日" formMethods={formMethods} />
+          <FormButton />
+        </form>
+      </CustomModal>
     </header>
   );
 };

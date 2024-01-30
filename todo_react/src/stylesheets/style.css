@@ -160,3 +160,19 @@ button:hover {
   color: red;
   padding-left: 8px;
 }
+
+.area {
+  min-width: 480px;
+  min-height: 200px;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+}
+
+.area.unfinished {
+  background-color: #c1ffe2;
+}
+
+.area.completed {
+  background-color: #ffffe0;
+}

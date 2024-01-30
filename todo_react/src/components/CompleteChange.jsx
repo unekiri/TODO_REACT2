@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { Header } from './Header';
 import { Load } from './Load';
 import { change_updateItem } from './Change_UpdateItem';
-import { FormDate } from './FormDate';
-import { FormButton } from './FormButton';
+import { FormDate } from './atom/FormDate';
+import { FormButton } from './atom/FormButton';
 import '../stylesheets/style.css';
 
 export const CompleteChange = () => {
