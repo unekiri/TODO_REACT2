@@ -1,8 +1,8 @@
 import { editItem } from './EditItems';
-import  axios from 'axios';
 import { deleteItem } from './DeleteItem';
 import { changeItem } from './ChangeItem';
 import { uri } from './ApiUrl'
+import axios from 'axios';
 
 // GETアクションのイベントハンドラ
 let todos = [];

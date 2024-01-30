@@ -7,5 +7,6 @@ export const Load = async (callback) => {
     const id = params.get('id');
     const data = await getSelectItem(id);
     const httpData = await data.json();
-    callback(httpData);
+    console.log(httpData);
+    callback(httpData); //呼び出し元にhttpDataを返す
 }
