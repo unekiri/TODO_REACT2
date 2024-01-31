@@ -5,7 +5,7 @@ import '../stylesheets/style.css';
 import top from '../images/top.jpeg';
 
 export const Header = ({ setCurrentView, setShowButtons }) => {
-  const [showForm, setShowForm] = useState(false); // モーダルの表示状態
+  const [showModal, setShowModal] = useState(false); // モーダルの表示状態
 
   const handleHomeClick = () => {
     setCurrentView("all");
@@ -33,10 +33,10 @@ export const Header = ({ setCurrentView, setShowButtons }) => {
         <ul className="main-nav">
           <li><Button onClick={handleIncompleteClick}>未完了</Button></li>
           <li><Button onClick={handleCompleteClick}>完了</Button></li>
-          <li><Button onClick={() => setShowForm(true)}>Todo追加</Button></li>
+          <li><Button onClick={() => setShowModal(true)}>Todo追加</Button></li>
         </ul>
       </nav>
-      <CustomModal open={showForm} onClose={() => setShowForm(false)} initialValues={{}} />
+      <CustomModal open={showModal} onClose={() => setShowModal(false)} initialValues={{}} />
     </header>
   );
 };

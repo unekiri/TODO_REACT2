@@ -6,8 +6,6 @@ import { useForm } from 'react-hook-form';
 import { FormContents } from './atom/FormContents';
 import { FormDate } from './atom/FormDate';
 import { FormButton } from './atom/FormButton';
-import axios from 'axios';
-import { uri } from './ApiUrl';
 
 const style = {
   position: 'absolute',
@@ -21,24 +19,10 @@ const style = {
   p: 4,
 };
 
-export const CustomModal = ({ open, onClose, initialValues, onSubmitSuccess }) => {
+export const CustomModal = ({ open, onClose, initialValues, onSubmit }) => {
   const { handleSubmit, register, errors } = useForm({
     defaultValues: initialValues,
   });
-
-  // 送信処理
-  const onSubmit = async (data) => {
-    try {
-      await axios.post(uri, {
-        ...data,
-        isComplete: false,
-        date: new Date(data.date).toISOString()
-      });
-      onClose(); // モーダルを閉じる
-    } catch (error) {
-      console.error('Unable to add item.', error);
-    }
-  };
 
   return (
     <Modal open={open} onClose={onClose}>

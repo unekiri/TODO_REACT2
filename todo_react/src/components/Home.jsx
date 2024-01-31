@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Header } from './Header';
 import { CustomModal } from './CustomModal';
-import { uri } from './ApiUrl';
 import '../stylesheets/style.css';
 
-const TodoList = ({ title, showButtons, todos, onEdit, onDelete, onChange }) => {
+// APIのURI
+export const uri = process.env.REACT_APP_API_URL;
+
+const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => {
   return (
     <div className={`area ${title === "未完了一覧" ? "unfinished" : "completed"}`}>
       <p className="title">{title}</p>
@@ -34,12 +36,12 @@ export const Home = () => {
   const [todos, setTodos] = useState([]);
   const [showButtons, setShowButtons] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [currentView, setCurrentView] = useState("all");
 
   useEffect(() => {
     fetchTodos(currentView);
-  }, [currentView]);
+  }, [currentView]); //初期状態
 
   const fetchTodos = async (status) => {
     try {
@@ -84,7 +86,7 @@ export const Home = () => {
       ];
   
       setTodos(updatedTodos);
-      setShowEditModal(false); // モーダルを閉じる
+      setShowModal(false); // モーダルを閉じる
       setCurrentView("all"); // 全体ページに移動
     } catch (error) {
       console.error('Unable to add item.', error);
@@ -93,7 +95,7 @@ export const Home = () => {
   
   const handleEditClick = (item) => {
     setEditingItem(item);
-    setShowEditModal(true);
+    setShowModal(true);
   };
   
   const editTodo = async (data) => {
@@ -118,7 +120,7 @@ export const Home = () => {
         updatedTodos = updatedTodos.sort((a, b) => new Date(a.date) - new Date(b.date));
   
         setTodos(updatedTodos);
-        setShowEditModal(false);
+        setShowModal(false);
         setCurrentView("all"); // 未完了画面に移動
       } catch (error) {
         console.error('Unable to update item', error);
@@ -128,7 +130,7 @@ export const Home = () => {
   
   const handleChangeClick = (item) => {
     setEditingItem(item);
-    setShowEditModal(true);
+    setShowModal(true);
   };
 
   const changeTodo = async (id) => {
@@ -159,8 +161,15 @@ export const Home = () => {
       console.error('Unable to delete item.', error);
     }
   };
-  
 
+  const handleModalSubmit = async (data) => {
+    if (editingItem) {
+      editTodo(data); // 既存のアイテムを編集する処理
+    } else {
+      addTodo(data); // 新しいアイテムを追加する処理
+    }
+  };
+  
   return (
     <>
       <Header setCurrentView={setCurrentView} setShowButtons={setShowButtons}/>
@@ -173,7 +182,7 @@ export const Home = () => {
               todos={todos.filter(todo => !todo.isComplete)} 
               onEdit={handleEditClick} 
               onDelete={deleteItem}
-              onChange={handleChangeClick} // 変更ボタンの処理を追加
+              onChange={handleChangeClick}
             />
           )}
           {currentView === "complete" && (
@@ -192,34 +201,25 @@ export const Home = () => {
                 title="未完了一覧" 
                 showButtons={showButtons} 
                 todos={todos.filter(todo => !todo.isComplete)} 
-                onEdit={handleEditClick} 
-                onDelete={deleteItem}
-                onChange={handleChangeClick} // 変更ボタンの処理を追加
               />
               <TodoList 
                 title="完了一覧" 
                 showButtons={showButtons} 
                 todos={todos.filter(todo => todo.isComplete)} 
-                onEdit={handleEditClick} 
-                onDelete={deleteItem}
-                onChange={handleChangeClick} // 変更ボタンの処理を追加
               />
             </>
           )}
         </div>
       </main>
-      {showEditModal && (
+      {showModal && (
         <CustomModal 
-          open={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            setCurrentView("all"); // HOME画面に移動
-          }}
-          initialValues={{ 
-            name: editingItem?.name, 
-            date: editingItem ? new Date(editingItem.date).toISOString().split('T')[0] : ''
-          }}
-          onSubmit={(data) => editingItem ? editTodo(data) : addTodo(data)} // 編集中のアイテムがある場合は editTodo、そうでなければ addTodo を使用
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        initialValues={{
+          name: editingItem ? editingItem.name : '', 
+          date: editingItem ? new Date(editingItem.date).toISOString().split('T')[0] : ''
+        }}
+        onSubmit={handleModalSubmit}
         />
       )}
     </>
