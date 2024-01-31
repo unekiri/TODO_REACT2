@@ -1,62 +1,25 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import { addItem } from './PostItem';
-import { FormContents } from './atom/FormContents';
-import { FormDate } from './atom/FormDate';
-import { FormButton } from './atom/FormButton';
 import { CustomModal } from './CustomModal';
 import '../stylesheets/style.css';
 import top from '../images/top.jpeg';
-import axios from 'axios';
-import { uri } from './ApiUrl';
 
-export const Header = ({ setCurrentView, setShowButtons, setTodos }) => {
+export const Header = ({ setCurrentView, setShowButtons }) => {
   const [showForm, setShowForm] = useState(false); // モーダルの表示状態
-  const { handleSubmit, ...formMethods } = useForm();
 
-  
   const handleHomeClick = () => {
     setCurrentView("all");
     setShowButtons(false);
   };
-  
+
   const handleIncompleteClick = () => {
-    setShowButtons(true);
     setCurrentView("incomplete");
-    fetchTodos("incomplete"); // 未完了のデータを取得
-  };
-  
-  const handleCompleteClick = () => {
     setShowButtons(true);
-    setCurrentView("complete");
-    fetchTodos("complete"); // 完了のデータを取得
-  };
-  
-  const handleOnSubmit = (data) => {
-    addItem(data);
-    setShowForm(false); // モーダルを閉じる
   };
 
-  const fetchTodos = async (status) => {
-    try {
-      const response = await axios.get(`${uri}?status=${status}`);
-      const formattedTodos = response.data.map(item => {
-        if (item.name.length >= 50) {
-          item.name = item.name.match(/.{1,50}/g).join('\n');
-        }
-        item.date = new Date(item.date).toLocaleString("ja-JP", {
-          year: "numeric",
-          month: "numeric",
-          day: "numeric",
-        });
-        return item;
-      });
-      // ... 加工後のデータをStateに設定 ...
-      setTodos(formattedTodos);
-    } catch (error) {
-      console.error('Error fetching data: ', error);
-    }
+  const handleCompleteClick = () => {
+    setCurrentView("complete");
+    setShowButtons(true);
   };
 
   return (
@@ -73,13 +36,7 @@ export const Header = ({ setCurrentView, setShowButtons, setTodos }) => {
           <li><Button onClick={() => setShowForm(true)}>Todo追加</Button></li>
         </ul>
       </nav>
-      <CustomModal open={showForm} onClose={() => setShowForm(false)}>
-        <form onSubmit={handleSubmit(handleOnSubmit)}>
-          <FormContents formMethods={formMethods} />
-          <FormDate title="完了予定日" formMethods={formMethods} />
-          <FormButton />
-        </form>
-      </CustomModal>
+      <CustomModal open={showForm} onClose={() => setShowForm(false)} initialValues={{}} />
     </header>
   );
 };

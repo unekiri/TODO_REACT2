@@ -1,8 +1,6 @@
 import React from 'react';
 
-export const FormDate = ({ title, formMethods }) => {
-  const { register, formState: { errors } } = formMethods;
-
+export const FormDate = ({ title, register, errors }) => {
   return (
       <div className="another-page">
         <p className="form">{title}</p>
@@ -12,7 +10,7 @@ export const FormDate = ({ title, formMethods }) => {
               required: '入力必須です。' }
           )}
         />
-        {errors.date && <span className="error-message">{errors.date.message}</span>}
+        {errors && errors.date && <span className="error-message">{errors.date.message}</span>}
       </div>
   );
 };

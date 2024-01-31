@@ -1,8 +1,6 @@
 import React from 'react';
 
-export const FormContents = ({ formMethods }) => {
-  const { register, formState: { errors } } = formMethods;
-
+export const FormContents = ({ register, errors }) => {
   return (
       <div className="another-page">
         <p className="form">タスクの内容</p>
@@ -13,7 +11,7 @@ export const FormContents = ({ formMethods }) => {
             maxLength : {value: 100, message: '100文字以内で入力して下さい。'}
           })}
         />
-        {errors.name && <span className="error-message">{errors.name.message}</span>}
+        {errors && errors.name && <span className="error-message">{errors.name.message}</span>}
       </div>
   );
 };
