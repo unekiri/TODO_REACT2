@@ -21,7 +21,7 @@ const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => 
                 <>
                   <button onClick={() => onEdit(item)}>編集</button>
                   <button onClick={() => onDelete(item.id)}>削除</button>
-                  <button onClick={() => onChange(item.id)}>変更</button>
+                  <button onClick={() => onChange(item)}>変更</button>
                 </>
               )}
             </div>
@@ -85,71 +85,59 @@ export const Home = () => {
         }
       ];
   
-      setTodos(updatedTodos);
-      setShowModal(false); // モーダルを閉じる
-      setCurrentView("all"); // 全体ページに移動
+      setTodos(updatedTodos.sort((a, b) => new Date(a.date) - new Date(b.date)));
     } catch (error) {
       console.error('Unable to add item.', error);
     }
   };
-  
+
   const handleEditClick = (item) => {
-    setEditingItem(item);
+    setEditingItem({ ...item, isStatusChangeAction: false });
     setShowModal(true);
   };
   
-  const editTodo = async (data) => {
-    if (editingItem) {
-      try {
-        const updatedItem = {
+  const handleChangeClick = (item) => {
+    setEditingItem({ ...item, isStatusChangeAction: true });
+    setShowModal(true);
+  };
+
+  const updateTodo = async (data, id, isStatusChange) => {
+    try {
+      let updatedItem;
+      if (isStatusChange) {
+        // 状態変更の場合
+        updatedItem = {
+          ...editingItem,
+          ...data,
+          date: new Date(data.date).toISOString(),          
+          isComplete: !editingItem.isComplete
+        };
+      } else {
+        // その他の編集の場合
+        updatedItem = {
           ...editingItem,
           ...data,
           date: new Date(data.date).toISOString(),
         };
-  
-        await axios.put(`${uri}/${editingItem.id}`, updatedItem);
-        
-        // 更新されたアイテムでリストを更新
-        let updatedTodos = todos.map(item => 
-          item.id === editingItem.id
-            ? { ...updatedItem, date: new Date(updatedItem.date).toLocaleString("ja-JP", { year: "numeric", month: "numeric", day: "numeric" }) }
-            : item
-        );
-  
-        // 更新されたリストを昇順にソート
-        updatedTodos = updatedTodos.sort((a, b) => new Date(a.date) - new Date(b.date));
-  
-        setTodos(updatedTodos);
-        setShowModal(false);
-        setCurrentView("all"); // 未完了画面に移動
-      } catch (error) {
-        console.error('Unable to update item', error);
       }
-    }
-  };
   
-  const handleChangeClick = (item) => {
-    setEditingItem(item);
-    setShowModal(true);
-  };
-
-  const changeTodo = async (id) => {
-    const item = todos.find(item => item.id === id);
-    if (item) {
-      try {
-        const updatedItem = {
-          ...item,
-          isComplete: !item.isComplete,
-          date: new Date(item.date).toISOString()
-        };
+      await axios.put(`${uri}/${id}`, updatedItem);
   
-        await axios.put(`${uri}/${id}`, updatedItem);
-        fetchTodos(currentView); // 更新後のリストを取得
-      } catch (error) {
-        console.error('Unable to update item.', error);
-      }
+      // 更新されたアイテムでリストを更新
+      const updatedTodos = todos.map(item =>
+        item.id === id
+          ? { ...updatedItem, date: new Date(updatedItem.date).toLocaleString("ja-JP", { year: "numeric", month: "numeric", day: "numeric" }) }
+          : item
+      );
+  
+      // 更新されたリストを昇順にソート
+      setTodos(updatedTodos.sort((a, b) => new Date(a.date) - new Date(b.date)));
+      setShowModal(false);
+    } catch (error) {
+      console.error('Unable to update item', error);
     }
-  };
+  };  
+  
 
   const deleteItem = async (id) => {
     try {
@@ -163,16 +151,12 @@ export const Home = () => {
   };
 
   const handleModalSubmit = async (data) => {
-    if (editingItem) {
-      editTodo(data); // 既存のアイテムを編集する処理
-    } else {
-      addTodo(data); // 新しいアイテムを追加する処理
-    }
-  };
-  
+    updateTodo(data, editingItem.id, editingItem.isStatusChangeAction);
+  } 
+
   return (
     <>
-      <Header setCurrentView={setCurrentView} setShowButtons={setShowButtons}/>
+      <Header addTodo={addTodo} setCurrentView={setCurrentView} setShowButtons={setShowButtons}/>
       <main>
         <div className="container">
           {currentView === "incomplete" && (
@@ -217,7 +201,7 @@ export const Home = () => {
         onClose={() => setShowModal(false)}
         initialValues={{
           name: editingItem ? editingItem.name : '', 
-          date: editingItem ? new Date(editingItem.date).toISOString().split('T')[0] : ''
+          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
         }}
         onSubmit={handleModalSubmit}
         />

@@ -4,7 +4,7 @@ import { CustomModal } from './CustomModal';
 import '../stylesheets/style.css';
 import top from '../images/top.jpeg';
 
-export const Header = ({ setCurrentView, setShowButtons }) => {
+export const Header = ({ addTodo, setCurrentView, setShowButtons }) => {
   const [showModal, setShowModal] = useState(false); // モーダルの表示状態
 
   const handleHomeClick = () => {
@@ -22,6 +22,12 @@ export const Header = ({ setCurrentView, setShowButtons }) => {
     setShowButtons(true);
   };
 
+  const handleModalSubmit = async (data, reset) => {
+    await addTodo(data);
+    reset();
+    setShowModal(false); // モーダルを閉じる
+  }
+
   return (
     <header id="header">
       <h1>
@@ -36,7 +42,7 @@ export const Header = ({ setCurrentView, setShowButtons }) => {
           <li><Button onClick={() => setShowModal(true)}>Todo追加</Button></li>
         </ul>
       </nav>
-      <CustomModal open={showModal} onClose={() => setShowModal(false)} initialValues={{}} />
+      <CustomModal open={showModal} onClose={() => setShowModal(false)} initialValues={{}} onSubmit={handleModalSubmit}/>
     </header>
   );
 };

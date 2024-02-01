@@ -1,6 +1,8 @@
 import React from 'react';
 
-export const FormContents = ({ register, errors }) => {
+export const FormContents = ({ formMethods }) => {
+  const { register, formState: { errors } } = formMethods;
+
   return (
       <div className="another-page">
         <p className="form">タスクの内容</p>

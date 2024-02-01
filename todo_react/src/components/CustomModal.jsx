@@ -1,11 +1,10 @@
-// CustomModal.js
 import React from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { useForm } from 'react-hook-form';
-import { FormContents } from './atom/FormContents';
-import { FormDate } from './atom/FormDate';
-import { FormButton } from './atom/FormButton';
+import { FormContents } from './Form/FormContents';
+import { FormDate } from './Form/FormDate';
+import { FormButton } from './Form/FormButton';
 
 const style = {
   position: 'absolute',
@@ -20,17 +19,19 @@ const style = {
 };
 
 export const CustomModal = ({ open, onClose, initialValues, onSubmit }) => {
-  const { handleSubmit, register, errors } = useForm({
+  const { handleSubmit, reset, ...formMethods } = useForm({
     defaultValues: initialValues,
   });
+
+  // onSubmit をラップする関数
+  const onSubmitWrapper = (data) => onSubmit(data, reset);
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* register('name') と register('date') の戻り値を直接コンポーネントに渡します */}
-          <FormContents register={register} errors={errors} />
-          <FormDate title="完了予定日" register={register} errors={errors} />
+        <form onSubmit={handleSubmit(onSubmitWrapper)}>
+          <FormContents formMethods={formMethods} />
+          <FormDate title="日付" formMethods={formMethods}/>
           <FormButton />
         </form>
       </Box>

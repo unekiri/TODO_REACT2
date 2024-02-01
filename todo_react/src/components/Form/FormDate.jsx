@@ -1,6 +1,8 @@
 import React from 'react';
 
-export const FormDate = ({ title, register, errors }) => {
+export const FormDate = ({ title, formMethods }) => {
+  const { register, formState: { errors } } = formMethods;
+
   return (
       <div className="another-page">
         <p className="form">{title}</p>
