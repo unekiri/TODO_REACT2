@@ -9,7 +9,7 @@ export const uri = process.env.REACT_APP_API_URL;
 
 const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => {
   return (
-    <div className={`area ${title === "未完了一覧" ? "unfinished" : "completed"}`}>
+    <div className={`area ${title === "未完了一覧" ? "incomplete" : "complete"}`}>
       <p className="title">{title}</p>
       <ul id={title === "未完了一覧" ? "incomplete-list" : "complete-list"}>
         {todos.map(item => (
@@ -39,17 +39,17 @@ export const Home = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentView, setCurrentView] = useState("all");
 
-  useEffect(() => {
+  useEffect(() => { // 特定の副作用がいつ再実行されるかをReactに指示するために使用される
     fetchTodos(currentView);
-  }, [currentView]); //初期状態
+  }, [currentView]);
 
   const fetchTodos = async (status) => {
     try {
       const query = status !== "all" ? `?status=${status}` : "";
       const response = await axios.get(`${uri}${query}`);
-      const sortedData = response.data
+      const sortedData = response.data //オブジェクトを要素に持つ配列
         .map(item => ({
-          ...item,
+          ...item, //オブジェクトの各プロパティを新しいオブジェクトにコピーし、追加のプロパティ（変換された date プロパティ）をそのオブジェクトに追加
           date: new Date(item.date).toLocaleString("ja-JP", {
             year: "numeric",
             month: "numeric",
@@ -69,7 +69,7 @@ export const Home = () => {
       const response = await axios.post(uri, {
         ...data,
         isComplete: false,
-        date: new Date(data.date).toISOString()
+        date: new Date(data.date).toISOString() // バックエンドシステムが解釈しやすい標準化された形式に変換
       });
       
       // 新しいTODOをリストに追加

@@ -24,7 +24,7 @@ export const Header = ({ addTodo, setCurrentView, setShowButtons }) => {
 
   const handleModalSubmit = async (data, reset) => {
     await addTodo(data);
-    reset();
+    reset(); // フォームのフィールドを初期値にリセット
     setShowModal(false); // モーダルを閉じる
   }
 

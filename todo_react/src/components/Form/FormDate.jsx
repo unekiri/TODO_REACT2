@@ -8,7 +8,7 @@ export const FormDate = ({ title, formMethods }) => {
         <p className="form">{title}</p>
         <input 
           id="date" type="date" 
-          {...register('date', { 
+          {...register('date', {  // フィールドの名前（キー）とユーザーが入力または選択した値が内部的に関連付けられ、フォーム送信時にその情報が収集される
               required: '入力必須です。' }
           )}
         />

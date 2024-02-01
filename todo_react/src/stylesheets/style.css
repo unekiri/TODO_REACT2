@@ -169,10 +169,10 @@ button:hover {
   border-radius: 8px;
 }
 
-.area.unfinished {
+.area.incomplete {
   background-color: #c1ffe2;
 }
 
-.area.completed {
+.area.complete {
   background-color: #ffffe0;
 }
