@@ -203,6 +203,7 @@ export const Home = () => {
           name: editingItem ? editingItem.name : '', 
           date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
         }}
+        isStatusChangeAction={editingItem ? editingItem.isStatusChangeAction : false}
         onSubmit={handleModalSubmit}
         />
       )}
