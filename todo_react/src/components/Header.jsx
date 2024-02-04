@@ -42,7 +42,7 @@ export const Header = ({ addTodo, setCurrentView, setShowButtons }) => {
           <li><Button onClick={() => setShowModal(true)}>Todo追加</Button></li>
         </ul>
       </nav>
-      <CustomModal open={showModal} onClose={() => setShowModal(false)} initialValues={{}} onSubmit={handleModalSubmit}/>
+      <CustomModal open={showModal} onClose={() => setShowModal(false)} title={'完了予定日'} initialValues={{}} onSubmit={handleModalSubmit}/>
     </header>
   );
 };

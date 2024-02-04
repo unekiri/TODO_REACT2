@@ -7,7 +7,7 @@ import '../stylesheets/style.css';
 // APIのURI
 export const uri = process.env.REACT_APP_API_URL;
 
-const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => {
+const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onChange }) => {
   return (
     <div className={`area ${title === "未完了一覧" ? "incomplete" : "complete"}`}>
       <p className="title">{title}</p>
@@ -21,7 +21,7 @@ const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => 
                 <>
                   <button onClick={() => onEdit(item)}>編集</button>
                   <button onClick={() => onDelete(item.id)}>削除</button>
-                  <button onClick={() => onChange(item)}>変更</button>
+                  <button onClick={() => onChange(item)}>{buttonText}</button>
                 </>
               )}
             </div>
@@ -46,7 +46,7 @@ export const Home = () => {
   const fetchTodos = async (status) => {
     try {
       const query = status !== "all" ? `?status=${status}` : "";
-      const response = await axios.get(`${uri}${query}`);
+      const response = await axios.get(`${uri}/${query}`);
       const sortedData = response.data //オブジェクトを要素に持つ配列
         .map(item => ({
           ...item, //オブジェクトの各プロパティを新しいオブジェクトにコピーし、追加のプロパティ（変換された date プロパティ）をそのオブジェクトに追加
@@ -92,35 +92,37 @@ export const Home = () => {
   };
 
   const handleEditClick = (item) => {
-    setEditingItem({ ...item, isStatusChangeAction: false });
+    setEditingItem({ ...item, isStatusChange: false });
     setShowModal(true);
   };
   
   const handleChangeClick = (item) => {
-    setEditingItem({ ...item, isStatusChangeAction: true });
+    setEditingItem({ ...item, isStatusChange: true });
     setShowModal(true);
   };
 
   const updateTodo = async (data, id, isStatusChange) => {
     try {
+      // 状態変更の場合とその他の編集の場合で処理を分ける
+      const updatedItemBase = {
+        ...editingItem,
+        ...data,
+        date: new Date(data.date).toISOString(),
+      };
+      
       let updatedItem;
       if (isStatusChange) {
-        // 状態変更の場合
+        // 状態変更の場合、isCompleteの値を反転させる
         updatedItem = {
-          ...editingItem,
-          ...data,
-          date: new Date(data.date).toISOString(),          
+          ...updatedItemBase,
           isComplete: !editingItem.isComplete
         };
       } else {
-        // その他の編集の場合
-        updatedItem = {
-          ...editingItem,
-          ...data,
-          date: new Date(data.date).toISOString(),
-        };
+        // その他の編集の場合、基本のオブジェクトをそのまま使用
+        updatedItem = updatedItemBase;
       }
   
+      // 更新処理を実行
       await axios.put(`${uri}/${id}`, updatedItem);
   
       // 更新されたアイテムでリストを更新
@@ -136,7 +138,8 @@ export const Home = () => {
     } catch (error) {
       console.error('Unable to update item', error);
     }
-  };  
+  };
+  
   
 
   const deleteItem = async (id) => {
@@ -151,8 +154,8 @@ export const Home = () => {
   };
 
   const handleModalSubmit = async (data) => {
-    updateTodo(data, editingItem.id, editingItem.isStatusChangeAction);
-  } 
+    updateTodo(data, editingItem.id, editingItem.isStatusChange);
+  }
 
   return (
     <>
@@ -162,6 +165,7 @@ export const Home = () => {
           {currentView === "incomplete" && (
             <TodoList 
               title="未完了一覧" 
+              buttonText="完了に変更"
               showButtons={showButtons} 
               todos={todos.filter(todo => !todo.isComplete)} 
               onEdit={handleEditClick} 
@@ -171,7 +175,8 @@ export const Home = () => {
           )}
           {currentView === "complete" && (
             <TodoList 
-              title="完了一覧" 
+              title="完了一覧"
+              buttonText="未完了に戻す"
               showButtons={showButtons} 
               todos={todos.filter(todo => todo.isComplete)} 
               onEdit={handleEditClick} 
@@ -182,12 +187,14 @@ export const Home = () => {
           {currentView === "all" && (
             <>
               <TodoList 
-                title="未完了一覧" 
+                title="未完了一覧"
+                buttonText="完了に変更"
                 showButtons={showButtons} 
                 todos={todos.filter(todo => !todo.isComplete)} 
               />
               <TodoList 
-                title="完了一覧" 
+                title="完了一覧"
+                buttonText="未完了に戻す"
                 showButtons={showButtons} 
                 todos={todos.filter(todo => todo.isComplete)} 
               />
@@ -200,10 +207,15 @@ export const Home = () => {
         open={showModal}
         onClose={() => setShowModal(false)}
         initialValues={{
-          name: editingItem ? editingItem.name : '', 
-          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
+          name: editingItem.name, 
+          date: new Date(editingItem.date + 'Z').toISOString().split('T')[0]
         }}
-        isStatusChangeAction={editingItem ? editingItem.isStatusChangeAction : false}
+        isStatusChange={editingItem.isStatusChange}
+        title={
+          editingItem.isStatusChange
+            ? (editingItem.isComplete ? '完了予定日' : '完了日')
+            : (editingItem.isComplete ? '完了日' : '完了予定日') // 編集ボタンが押された時
+        }
         onSubmit={handleModalSubmit}
         />
       )}
