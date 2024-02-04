@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Header } from './Header';
 import { CustomModal } from './CustomModal';
+import { AlertDialog } from './AlertDialog';
 import '../stylesheets/style.css';
 
 // APIのURI
@@ -20,7 +21,7 @@ const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onC
               {showButtons && (
                 <>
                   <button onClick={() => onEdit(item)}>編集</button>
-                  <button onClick={() => onDelete(item.id)}>削除</button>
+                  <button onClick={() => onDelete(item)}>削除</button>
                   <button onClick={() => onChange(item)}>{buttonText}</button>
                 </>
               )}
@@ -35,9 +36,11 @@ const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onC
 export const Home = () => {
   const [todos, setTodos] = useState([]);
   const [showButtons, setShowButtons] = useState(false);
+  const [currentView, setCurrentView] = useState("all");
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [currentView, setCurrentView] = useState("all");
+  const [deletingItem, setDeletingItem] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => { // 特定の副作用がいつ再実行されるかをReactに指示するために使用される
     fetchTodos(currentView);
@@ -140,7 +143,10 @@ export const Home = () => {
     }
   };
   
-  
+  const handleDeleteClick = (item) => {
+    setDeletingItem(item);
+    setOpenDialog(true);
+  }
 
   const deleteItem = async (id) => {
     try {
@@ -169,7 +175,7 @@ export const Home = () => {
               showButtons={showButtons} 
               todos={todos.filter(todo => !todo.isComplete)} 
               onEdit={handleEditClick} 
-              onDelete={deleteItem}
+              onDelete={handleDeleteClick}
               onChange={handleChangeClick}
             />
           )}
@@ -180,7 +186,7 @@ export const Home = () => {
               showButtons={showButtons} 
               todos={todos.filter(todo => todo.isComplete)} 
               onEdit={handleEditClick} 
-              onDelete={deleteItem}
+              onDelete={handleDeleteClick}
               onChange={handleChangeClick}
             />
           )}
@@ -204,19 +210,27 @@ export const Home = () => {
       </main>
       {showModal && (
         <CustomModal 
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        initialValues={{
-          name: editingItem.name, 
-          date: new Date(editingItem.date + 'Z').toISOString().split('T')[0]
-        }}
-        isStatusChange={editingItem.isStatusChange}
-        title={
-          editingItem.isStatusChange
-            ? (editingItem.isComplete ? '完了予定日' : '完了日')
-            : (editingItem.isComplete ? '完了日' : '完了予定日') // 編集ボタンが押された時
-        }
-        onSubmit={handleModalSubmit}
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          initialValues={{
+            name: editingItem.name, 
+            date: new Date(editingItem.date + 'Z').toISOString().split('T')[0]
+          }}
+          isStatusChange={editingItem.isStatusChange}
+          title={
+            editingItem.isStatusChange
+              ? (editingItem.isComplete ? '完了予定日' : '完了日')
+              : (editingItem.isComplete ? '完了日' : '完了予定日') // 編集ボタンが押された時
+          }
+          onSubmit={handleModalSubmit}
+        />
+      )}
+      {openDialog && (
+        <AlertDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          deletingItem={deletingItem}
+          onDelete={deleteItem}
         />
       )}
     </>
