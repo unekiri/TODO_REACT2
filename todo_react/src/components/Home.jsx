@@ -12,26 +12,34 @@ const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onC
   return (
     <div className={`area ${title === "未完了一覧" ? "incomplete" : "complete"}`}>
       <p className="title">{title}</p>
-      <ul id={title === "未完了一覧" ? "incomplete-list" : "complete-list"}>
-        {todos.map(item => (
-          <div key={item.id} className="list-row">
-            <li>{item.name}</li>
-            <div className="item-area">
-              <span className="detail-plan">{item.date}</span>
+      <table id={title === "未完了一覧" ? "incomplete-list" : "complete-list"} className="table">
+        <thead>
+          <tr>
+            <th>タスクの内容</th>
+            <th>{title === "未完了一覧" ? "完了予定日" : "完了日"}</th>
+            {showButtons && <th>操作</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {todos.map(item => (
+            <tr key={item.id}>
+              <td>{item.name}</td>
+              <td>{item.date}</td>
               {showButtons && (
-                <>
+                <td>
                   <button onClick={() => onEdit(item)}>編集</button>
                   <button onClick={() => onDelete(item)}>削除</button>
                   <button onClick={() => onChange(item)}>{buttonText}</button>
-                </>
+                </td>
               )}
-            </div>
-          </div>
-        ))}
-      </ul>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
+
 
 export const Home = () => {
   const [todos, setTodos] = useState([]);
