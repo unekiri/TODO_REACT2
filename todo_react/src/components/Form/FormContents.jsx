@@ -21,7 +21,7 @@ export const FormContents = ({ formMethods, isStatusChangeAction }) => {
         })}
         error={Boolean(errors.name)} // エラー状態の制御
         helperText={errors.name ? errors.name.message : ''} // エラーメッセージの表示
-        disabled={isStatusChangeAction} // disabled状態を動的に制御する場合はこの行を有効にする
+        disabled={isStatusChangeAction}
       />
     </div>
   );

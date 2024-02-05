@@ -108,7 +108,7 @@ export const Home = () => {
         // 状態変更の場合
         updatedItem = {
           ...editingItem,
-          ...data,
+          ...data, // 受け取ったデータでeditingItemを上書き
           date: new Date(data.date).toISOString(),          
           isComplete: !editingItem.isComplete
         };
@@ -201,7 +201,7 @@ export const Home = () => {
         onClose={() => setShowModal(false)}
         initialValues={{
           name: editingItem ? editingItem.name : '', 
-          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
+          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC日付をローカルタイムゾーンに変換
         }}
         isStatusChangeAction={editingItem ? editingItem.isStatusChangeAction : false}
         onSubmit={handleModalSubmit}

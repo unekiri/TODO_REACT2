@@ -24,7 +24,7 @@ export const CustomModal = ({ open, onClose, initialValues, onSubmit, isStatusCh
   });
 
   // onSubmit をラップする関数
-  const onSubmitWrapper = (data) => onSubmit(data, reset);
+  const onSubmitWrapper = (data) => onSubmit(data, reset); // handleSubmitによる呼び出し時に、フォームのデータが自動的にonSubmitWrapper関数に渡される
 
   return (
     <Modal open={open} onClose={onClose}>
