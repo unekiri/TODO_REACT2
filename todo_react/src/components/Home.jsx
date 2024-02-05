@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Header } from './Header';
 import { CustomModal } from './CustomModal';
 import { AlertDialog } from './AlertDialog';
+import { TextWithBreaks } from './TextWithBreaks';
 import '../stylesheets/style.css';
 
 // APIのURI
@@ -16,15 +17,15 @@ const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onC
         <thead>
           <tr>
             <th>タスクの内容</th>
-            <th>{title === "未完了一覧" ? "完了予定日" : "完了日"}</th>
+            <th className="date">{title === "未完了一覧" ? "完了予定日" : "完了日"}</th>
             {showButtons && <th>操作</th>}
           </tr>
         </thead>
         <tbody>
           {todos.map(item => (
             <tr key={item.id}>
-              <td>{item.name}</td>
-              <td>{item.date}</td>
+              <TextWithBreaks text={item.name} />
+              <td className='date'>{item.date}</td>
               {showButtons && (
                 <td>
                   <button onClick={() => onEdit(item)}>編集</button>
