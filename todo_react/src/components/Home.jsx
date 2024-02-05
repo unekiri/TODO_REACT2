@@ -2,42 +2,53 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Header } from './Header';
 import { CustomModal } from './CustomModal';
+import { AlertDialog } from './AlertDialog';
 import '../stylesheets/style.css';
 
 // APIのURI
 export const uri = process.env.REACT_APP_API_URL;
 
-const TodoList = ({ todos, title, showButtons, onEdit, onDelete, onChange }) => {
+const TodoList = ({ todos, title, showButtons, buttonText, onEdit, onDelete, onChange }) => {
   return (
     <div className={`area ${title === "未完了一覧" ? "incomplete" : "complete"}`}>
       <p className="title">{title}</p>
-      <ul id={title === "未完了一覧" ? "incomplete-list" : "complete-list"}>
-        {todos.map(item => (
-          <div key={item.id} className="list-row">
-            <li>{item.name}</li>
-            <div className="item-area">
-              <span className="detail-plan">{item.date}</span>
+      <table id={title === "未完了一覧" ? "incomplete-list" : "complete-list"} className="table">
+        <thead>
+          <tr>
+            <th>タスクの内容</th>
+            <th>{title === "未完了一覧" ? "完了予定日" : "完了日"}</th>
+            {showButtons && <th>操作</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {todos.map(item => (
+            <tr key={item.id}>
+              <td>{item.name}</td>
+              <td>{item.date}</td>
               {showButtons && (
-                <>
+                <td>
                   <button onClick={() => onEdit(item)}>編集</button>
-                  <button onClick={() => onDelete(item.id)}>削除</button>
-                  <button onClick={() => onChange(item)}>変更</button>
-                </>
+                  <button onClick={() => onDelete(item)}>削除</button>
+                  <button onClick={() => onChange(item)}>{buttonText}</button>
+                </td>
               )}
-            </div>
-          </div>
-        ))}
-      </ul>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
+
 export const Home = () => {
   const [todos, setTodos] = useState([]);
   const [showButtons, setShowButtons] = useState(false);
+  const [currentView, setCurrentView] = useState("all");
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [currentView, setCurrentView] = useState("all");
+  const [deletingItem, setDeletingItem] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => { // 特定の副作用がいつ再実行されるかをReactに指示するために使用される
     fetchTodos(currentView);
@@ -46,7 +57,7 @@ export const Home = () => {
   const fetchTodos = async (status) => {
     try {
       const query = status !== "all" ? `?status=${status}` : "";
-      const response = await axios.get(`${uri}${query}`);
+      const response = await axios.get(`${uri}/${query}`);
       const sortedData = response.data //オブジェクトを要素に持つ配列
         .map(item => ({
           ...item, //オブジェクトの各プロパティを新しいオブジェクトにコピーし、追加のプロパティ（変換された date プロパティ）をそのオブジェクトに追加
@@ -92,35 +103,37 @@ export const Home = () => {
   };
 
   const handleEditClick = (item) => {
-    setEditingItem({ ...item, isStatusChangeAction: false });
+    setEditingItem({ ...item, isStatusChange: false });
     setShowModal(true);
   };
   
   const handleChangeClick = (item) => {
-    setEditingItem({ ...item, isStatusChangeAction: true });
+    setEditingItem({ ...item, isStatusChange: true });
     setShowModal(true);
   };
 
   const updateTodo = async (data, id, isStatusChange) => {
     try {
+      // 状態変更の場合とその他の編集の場合で処理を分ける
+      const updatedItemBase = {
+        ...editingItem,
+        ...data,
+        date: new Date(data.date).toISOString(),
+      };
+      
       let updatedItem;
       if (isStatusChange) {
-        // 状態変更の場合
+        // 状態変更の場合、isCompleteの値を反転させる
         updatedItem = {
-          ...editingItem,
-          ...data, // 受け取ったデータでeditingItemを上書き
-          date: new Date(data.date).toISOString(),          
+          ...updatedItemBase,
           isComplete: !editingItem.isComplete
         };
       } else {
-        // その他の編集の場合
-        updatedItem = {
-          ...editingItem,
-          ...data,
-          date: new Date(data.date).toISOString(),
-        };
+        // その他の編集の場合、基本のオブジェクトをそのまま使用
+        updatedItem = updatedItemBase;
       }
   
+      // 更新処理を実行
       await axios.put(`${uri}/${id}`, updatedItem);
   
       // 更新されたアイテムでリストを更新
@@ -136,8 +149,12 @@ export const Home = () => {
     } catch (error) {
       console.error('Unable to update item', error);
     }
-  };  
+  };
   
+  const handleDeleteClick = (item) => {
+    setDeletingItem(item);
+    setOpenDialog(true);
+  }
 
   const deleteItem = async (id) => {
     try {
@@ -151,8 +168,8 @@ export const Home = () => {
   };
 
   const handleModalSubmit = async (data) => {
-    updateTodo(data, editingItem.id, editingItem.isStatusChangeAction);
-  } 
+    updateTodo(data, editingItem.id, editingItem.isStatusChange);
+  }
 
   return (
     <>
@@ -162,32 +179,36 @@ export const Home = () => {
           {currentView === "incomplete" && (
             <TodoList 
               title="未完了一覧" 
+              buttonText="完了に変更"
               showButtons={showButtons} 
               todos={todos.filter(todo => !todo.isComplete)} 
               onEdit={handleEditClick} 
-              onDelete={deleteItem}
+              onDelete={handleDeleteClick}
               onChange={handleChangeClick}
             />
           )}
           {currentView === "complete" && (
             <TodoList 
-              title="完了一覧" 
+              title="完了一覧"
+              buttonText="未完了に戻す"
               showButtons={showButtons} 
               todos={todos.filter(todo => todo.isComplete)} 
               onEdit={handleEditClick} 
-              onDelete={deleteItem}
+              onDelete={handleDeleteClick}
               onChange={handleChangeClick}
             />
           )}
           {currentView === "all" && (
             <>
               <TodoList 
-                title="未完了一覧" 
+                title="未完了一覧"
+                buttonText="完了に変更"
                 showButtons={showButtons} 
                 todos={todos.filter(todo => !todo.isComplete)} 
               />
               <TodoList 
-                title="完了一覧" 
+                title="完了一覧"
+                buttonText="未完了に戻す"
                 showButtons={showButtons} 
                 todos={todos.filter(todo => todo.isComplete)} 
               />
@@ -201,10 +222,18 @@ export const Home = () => {
         onClose={() => setShowModal(false)}
         initialValues={{
           name: editingItem ? editingItem.name : '', 
-          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC日付をローカルタイムゾーンに変換
+          date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
         }}
         isStatusChangeAction={editingItem ? editingItem.isStatusChangeAction : false}
         onSubmit={handleModalSubmit}
+        />
+      )}
+      {openDialog && (
+        <AlertDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          deletingItem={deletingItem}
+          onDelete={deleteItem}
         />
       )}
     </>

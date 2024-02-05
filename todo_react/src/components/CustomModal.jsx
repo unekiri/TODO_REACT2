@@ -18,21 +18,21 @@ const style = {
   p: 4,
 };
 
-export const CustomModal = ({ open, onClose, initialValues, onSubmit, isStatusChangeAction }) => {
+export const CustomModal = ({ open, onClose, initialValues, title, onSubmit, isStatusChangeAction }) => {
   const { handleSubmit, reset, ...formMethods } = useForm({
     defaultValues: initialValues,
   });
 
   // onSubmit をラップする関数
-  const onSubmitWrapper = (data) => onSubmit(data, reset); // handleSubmitによる呼び出し時に、フォームのデータが自動的にonSubmitWrapper関数に渡される
+  const onSubmitWrapper = (data) => onSubmit(data, reset); // register関数を使ってフォームの各フィールドを登録し、handleSubmit関数を使って処理する際に、それらのフィールドのデータを自動的に収集してdataオブジェクトとして提供
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
         <form onSubmit={handleSubmit(onSubmitWrapper)}>
           <FormContents formMethods={formMethods} isStatusChangeAction={isStatusChangeAction} />
-          <FormDate title="日付" formMethods={formMethods}/>
-          <FormButton />
+          <FormDate title={title} formMethods={formMethods}/>
+          <FormButton onClose={onClose}/>
         </form>
       </Box>
     </Modal>

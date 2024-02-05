@@ -176,3 +176,7 @@ button:hover {
 .area.complete {
   background-color: #ffffe0;
 }
+
+.table {
+  margin: auto;
+}
