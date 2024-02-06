@@ -18,7 +18,7 @@ const style = {
   p: 4,
 };
 
-export const CustomModal = ({ open, onClose, initialValues, title, onSubmit, isStatusChangeAction }) => {
+export const CustomModal = ({ open, onClose, initialValues, title, onSubmit, isStatusChange }) => {
   const { handleSubmit, reset, ...formMethods } = useForm({
     defaultValues: initialValues,
   });
@@ -30,7 +30,7 @@ export const CustomModal = ({ open, onClose, initialValues, title, onSubmit, isS
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
         <form onSubmit={handleSubmit(onSubmitWrapper)}>
-          <FormContents formMethods={formMethods} isStatusChangeAction={isStatusChangeAction} />
+          <FormContents formMethods={formMethods} isStatusChange={isStatusChange} />
           <FormDate title={title} formMethods={formMethods}/>
           <FormButton onClose={onClose}/>
         </form>

@@ -2,7 +2,7 @@ import React from 'react';
 // MUIのTextFieldコンポーネントをインポート
 import TextField from '@mui/material/TextField';
 
-export const FormContents = ({ formMethods, isStatusChangeAction }) => {
+export const FormContents = ({ formMethods, isStatusChange }) => {
   const { register, formState: { errors } } = formMethods;
 
   return (
@@ -21,7 +21,7 @@ export const FormContents = ({ formMethods, isStatusChangeAction }) => {
         })}
         error={Boolean(errors.name)} // エラー状態の制御
         helperText={errors.name ? errors.name.message : ''} // エラーメッセージの表示
-        disabled={isStatusChangeAction}
+        disabled={isStatusChange}
       />
     </div>
   );
