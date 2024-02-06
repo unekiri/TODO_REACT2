@@ -172,6 +172,19 @@ export const Home = () => {
     updateTodo(data, editingItem.id, editingItem.isStatusChange);
   }
 
+  const setDateTitle = () => {
+    if (editingItem) {
+      if (editingItem.isStatusChange) {
+        // ステータス変更がある場合、真偽値を反転させてタイトルを設定
+        return editingItem.isComplete ? '完了予定日' : '完了日';
+      } else {
+        // ステータス変更がない場合、現在のステータスに基づいてタイトルを設定
+        return editingItem.isComplete ? '完了日' : '完了予定日';
+      }
+    }
+    return ''; // 編集アイテムがない場合は空文字を返す
+  };
+
   return (
     <>
       <Header addTodo={addTodo} setCurrentView={setCurrentView} setShowButtons={setShowButtons}/>
@@ -225,7 +238,7 @@ export const Home = () => {
           name: editingItem ? editingItem.name : '', 
           date: editingItem ? new Date(editingItem.date + 'Z').toISOString().split('T')[0] : '' // UTC 日付をローカルタイムゾーンに変換
         }}
-        title={editingItem && editingItem.isComplete ? '完了予定日' : '完了日'}
+        title={setDateTitle()}
         isStatusChange={editingItem ? editingItem.isStatusChange : false}
         onSubmit={handleModalSubmit}
         />
